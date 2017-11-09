@@ -46,7 +46,7 @@ class Interface():
 t = 0
 fileID = 0
 thresh_count = 0
-large_time = 300
+large_thresh = 300
 interface1=Interface(1)
 interface2=Interface(2)
 interface_list=[interface1,interface2]
@@ -88,7 +88,7 @@ if __name__ == '__main__':
                     comp_file_list.append(file_list[interface.fileID])
                     #if file_list[interface.fileID].fileSize > large_thresh:
                     #   thresh_count +=1
-                    if (cur_file.departureTime - cur_file.arrivalTime) > large_time
+                    if (cur_file.departureTime - cur_file.arrivalTime) > large_thresh
                         thresh_count +=1
                     interface.clear()
         #3. check if interfaces are available. If so, pop from queue and add to interface

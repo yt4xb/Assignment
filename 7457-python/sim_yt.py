@@ -14,7 +14,7 @@ class File():
         self.fileSize = fsize
         self.arrivalTime = at
         self.timeInterval = interval
-        self.serviceTime = at + fsize / 1.25
+        self.serviceTime = fsize / 1.25
         self.waitingTime = 0
         self.departureTime = 0
 
@@ -46,8 +46,7 @@ class Interface():
 t = 0
 fileID = 0
 thresh_count = 0
-large_thresh = 200
-
+large_time = 300
 interface1=Interface(1)
 interface2=Interface(2)
 interface_list=[interface1,interface2]
@@ -75,7 +74,7 @@ if __name__ == '__main__':
     file_list = []
     comp_file_list = []
     #global thres_count, t, fileID
-    while thresh_count < 100 :
+    while pareto[fileID] :
         #1. Generate new file
         new_file = generate_file()
         file_list.append(new_file)
@@ -87,7 +86,9 @@ if __name__ == '__main__':
                 cur_file = file_list[interface.fileID]
                 if cur_file.departureTime <= t:
                     comp_file_list.append(file_list[interface.fileID])
-                    if file_list[interface.fileID].fileSize > large_thresh:
+                    #if file_list[interface.fileID].fileSize > large_thresh:
+                    #   thresh_count +=1
+                    if (cur_file.departureTime - cur_file.arrivalTime) > large_time
                         thresh_count +=1
                     interface.clear()
         #3. check if interfaces are available. If so, pop from queue and add to interface

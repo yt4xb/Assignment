@@ -4,7 +4,7 @@ import time
 
 #Assume large files are over 200 GB
 #------------------Class Definitions------------------------#
-with open("trunc5M.txt") as text_file:
+with open("trunc10M.txt") as text_file:
     lines=text_file.read().split()
     pareto=[float(i) for i in lines]
 
@@ -14,7 +14,7 @@ class File():
         self.fileSize = fsize
         self.arrivalTime = at
         self.timeInterval = interval
-        self.serviceTime = at + fsize / 1.25
+        self.serviceTime = fsize / 1.25
         self.waitingTime = 0
         self.departureTime = 0
 
@@ -47,28 +47,34 @@ t = 0
 fileID = 0
 thresh_count = 0
 large_thresh = 200
+large_time = 300 # 5min
+arrival_rate = 1.11
 
 interface1=Interface(1)
 interface2=Interface(2)
 interface_list=[interface1,interface2]
 
 def generate_file():
-    global t,fileID
-    t_int = np.random.exponential(1)
+    global t,fileID, arrival_rate
+    t_int = np.random.exponential(arrival_rate)
     f_pareto = pareto[fileID]
     t=t+t_int
     new_file=File(f_pareto,t,t_int,fileID)
     fileID=fileID+1
-    print(new_file)
+    #print(new_file)
     return new_file
 
 def check_interface():
+    freeInterfaceID=[]
     for interface in interface_list:
         if not interface.busy:
-            return interface.id
-    return 0
+            #print "Interface %d is not busy" %interface.id
+            freeInterfaceID.append(interface.id)
+        #return freeInterfaceID
+    #print "Both interfaces are busy"
+    return freeInterfaceID
 
-if __name__ == '__main__':
+if __name__ == '__blah__':
     global large_thresh, thresh_count, interface_list
     st_time = time.time()
     queue=[]
@@ -80,31 +86,58 @@ if __name__ == '__main__':
         new_file = generate_file()
         file_list.append(new_file)
         queue.append(new_file)
-        #2. Remove any completed files from interfaces
+
+        #2. Remove any completed files from interfaces before current time t
         for interface in interface_list:
+            # if the interface is empty, interfaceId will be none
+            # if the interface is busy
+            #print "In Interface %d"%interface.id
+            
             if interface.fileID is not None:
+                #print "interface is busy processing file %d" % interface.fileID
+                #print "current time%f"%t
+                #print "departure time%f"%file_list[interface.fileID].departureTime  
                 #if file has been processed by now, remove it
-                cur_file = file_list[interface.fileID]
-                if cur_file.departureTime <= t:
+                #cur_file = file_list[interface.fileID]
+                while file_list[interface.fileID].departureTime <= t:
                     comp_file_list.append(file_list[interface.fileID])
-                    if file_list[interface.fileID].fileSize > large_thresh:
+                    #print "File complete:"
+                    #print file_list[interface.fileID]
+                    if file_list[interface.fileID].departureTime - file_list[interface.fileID].arrivalTime > large_time:
                         thresh_count +=1
+                        print file_list[interface.fileID]
+                        print "Thresh count is:%d" %thresh_count
+                    finishedID = interface.fileID
                     interface.clear()
+                    #if there are files in the waiting list
+                    if not len(queue) == 0:
+                        serving_file = queue.pop(0)
+                        serving_file.departureTime = file_list[finishedID].departureTime + serving_file.serviceTime
+                        try:
+                            interface.addFile(serving_file.id)
+                        except:
+                            print "error. queue-len: " + str(len(queue)) + ", int_state: " + str(interfaceState)
+                    else: 
+                        break
+
+
         #3. check if interfaces are available. If so, pop from queue and add to interface
         interfaceState = check_interface()
-        print "interface_stte: " + str(interfaceState)
-        if interfaceState == 1 :
-            #update departure time and add file to interface
-            serving_file = queue.pop(0)
-            serving_file.departureTime = t +  serving_file.serviceTime
-            interface_list[interfaceState-1].addFile(serving_file.id)
-        elif interfaceState == 2:
-            serving_file=queue.pop(0)
-            serving_file.departureTime = t +  serving_file.serviceTime
-            try:
-                interface_list[interfaceState-1].addFile(serving_file.id)
-            except:
-                print "error. queue-len: " + str(len(queue)) + ", int_state: " + str(interfaceState)
+        #print "interface_state: " + str(interfaceState)
+
+        for interfaceID in interfaceState:
+            #print "Queue size %d" %len(queue)
+            if not len(queue) == 0:
+                serving_file = queue.pop(0)
+                #print "Poping file %d"%serving_file.id
+                serving_file.departureTime = t+serving_file.serviceTime
+                file_list[serving_file.id].departureTime = serving_file.departureTime 
+                try:
+                    interface_list[interfaceID-1].addFile(serving_file.id)
+                except:
+                    print "error. queue-len: " + str(len(queue)) + ", int_state: " + str(interfaceID)
+
+
         #4. Update waiting times of files in queue
         for f in queue: f.waitingTime += new_file.timeInterval
     duration = time.time() - st_time

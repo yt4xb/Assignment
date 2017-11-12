@@ -81,7 +81,7 @@ if __name__ == '__blah__':
     file_list = []
     comp_file_list = []
     #global thres_count, t, fileID
-    for fileID in 100
+    for fileID in 100:
 		#1. Generate new file
         new_file = generate_file()
         file_list.append(new_file)

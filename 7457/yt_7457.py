@@ -54,7 +54,7 @@ interface1=Interface(1)
 interface2=Interface(2)
 interface_list=[interface1,interface2]
 def trunc_pareto():
-	u = numpy.random.uniform(0,1,1)
+	u = np.random.uniform(0,1,1)
 	temp = (-(u*pow(1000,2)-u*pow(1,2)-pow(1000,2)))/(pow(1000,2)*pow(1,2))
 	x = pow(temp,-0.5)
 	return x
@@ -62,7 +62,7 @@ def trunc_pareto():
 def generate_file():
     global t,fileID, arrival_rate
     t_int = np.random.exponential(arrival_rate)
-    f_pareto = pareto[fileID]
+    f_pareto = trunc_pareto()
     t=t+t_int
     new_file=File(f_pareto,t,t_int,fileID)
     fileID=fileID+1

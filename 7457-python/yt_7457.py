@@ -75,7 +75,7 @@ def check_interface():
     return freeInterfaceID
 
 if __name__ == '__blah__':
-    global large_thresh, thresh_count, interface_list
+    global large_thresh, thresh_count, interface_list, fileID
     st_time = time.time()
     queue=[]
     file_list = []

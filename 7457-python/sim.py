@@ -137,14 +137,21 @@ if __name__ == '__blah__':
                 except:
                     print "error. queue-len: " + str(len(queue)) + ", int_state: " + str(interfaceID)
 
-
         #4. Update waiting times of files in queue
         for f in queue: f.waitingTime += new_file.timeInterval
     duration = time.time() - st_time
     print "duration: " + str(duration)
     print "total files: " + str(fileID)
-        
-        
+
+def exportData():        
+    simOut = open('simOutput.csv', 'w')
+    simOut.write(','.join(comp_file_list[0].__dict__.keys()) + '\n')
+    for fc in comp_file_list:
+        fvals = [str(v) for v in fc.__dict__.values()]
+        outstr = ','.join(fvals) + '\n'
+        simOut.write(outstr)
+    simOut.close()
+    
         
 
 
